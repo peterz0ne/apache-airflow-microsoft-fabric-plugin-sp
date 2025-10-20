@@ -1,5 +1,5 @@
 Metadata-Version: 2.4
-Name: apache_airflow_microsoft_fabric_plugin-sp
+Name: apache_airflow_microsoft_fabric_plugin_sp
 Version: 1.0.3
 Summary: A plugin for Apache Airflow to interact with Microsoft Fabric items
 Author-email: Peter Honved <honved.peti2002@gmail.com>
