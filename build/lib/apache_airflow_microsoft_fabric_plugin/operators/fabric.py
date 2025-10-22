@@ -23,12 +23,12 @@ from typing import TYPE_CHECKING, Sequence
 
 from airflow.configuration import conf
 from airflow.models import BaseOperator, BaseOperatorLink, XCom
-from apache_airflow_microsoft_fabric_plugin_sp.hooks.fabric import (
+from apache_airflow_microsoft_fabric_plugin.hooks.fabric import (
     FabricHook,
     FabricRunItemException,
     FabricRunItemStatus,
 )
-from apache_airflow_microsoft_fabric_plugin_sp.triggers.fabric import FabricTrigger
+from apache_airflow_microsoft_fabric_plugin.triggers.fabric import FabricTrigger
 from airflow.utils.decorators import apply_defaults
 
 if TYPE_CHECKING:
@@ -121,6 +121,15 @@ class FabricRunItemOperator(BaseOperator):
         """Create and return the FabricHook (cached)."""
         return FabricHook(fabric_conn_id=self.fabric_conn_id, max_retries=self.max_retries, retry_delay=self.retry_delay)
 
+    def handle_failure(self, context):
+        item_run_details = self.hook.get_item_run_details(self.location)
+        item_failure_reason = item_run_details.get("failureReason", dict())
+        
+        self.item_run_status = item_run_details["status"]
+        context["ti"].xcom_push(key="run_status", value=self.item_run_status)
+        raise FabricRunItemException(
+            f"Item run {self.item_run_id} has failed with status {self.item_run_status}.{"Details: " + str(item_failure_reason) if item_failure_reason is not None else ""}"
+        )
     def execute(self, context: Context) -> None:
         # Execute the item run
         self.location = self.hook.run_fabric_item(
@@ -147,9 +156,7 @@ class FabricRunItemOperator(BaseOperator):
                 ):
                     self.log.info("Item run %s has completed successfully.", self.item_run_id)
                 else:
-                    raise FabricRunItemException(
-                        f"Item run {self.item_run_id} has failed with status {self.item_run_status}."
-                    )
+                    self.handle_failure(context)
             else:
                 end_time = time.monotonic() + self.timeout
 
@@ -172,9 +179,7 @@ class FabricRunItemOperator(BaseOperator):
                 elif self.item_run_status == FabricRunItemStatus.COMPLETED:
                     self.log.info("Item run %s has completed successfully.", self.item_run_id)
                 elif self.item_run_status in FabricRunItemStatus.FAILURE_STATES:
-                    raise FabricRunItemException(
-                        f"Item run {self.item_run_id} has failed with status {self.item_run_status}."
-                    )
+                    self.handle_failure(context)
 
             # Update the status of Item run in Xcom
             item_run_details = self.hook.get_item_run_details(self.location)

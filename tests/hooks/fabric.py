@@ -7,7 +7,7 @@ import pytest
 import requests
 
 from airflow.models.connection import Connection
-from apache_airflow_microsoft_fabric_plugin_sp.hooks.fabric import (
+from apache_airflow_microsoft_fabric_plugin.hooks.fabric import (
     FabricAsyncHook,
     FabricHook,
     FabricRunItemException,
@@ -22,7 +22,7 @@ ITEM_RUN_ID = "item_run_id"
 BASE_URL = "https://api.fabric.microsoft.com"
 API_VERSION = "v1"
 JOB_TYPE = "RunNotebook"
-MODULE = "apache_airflow_microsoft_fabric_plugin_sp.hooks.fabric"
+MODULE = "apache_airflow_microsoft_fabric_plugin.hooks.fabric"
 
 
 @pytest.fixture(autouse=True)

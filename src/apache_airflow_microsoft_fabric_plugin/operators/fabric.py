@@ -23,12 +23,12 @@ from typing import TYPE_CHECKING, Sequence
 
 from airflow.configuration import conf
 from airflow.models import BaseOperator, BaseOperatorLink, XCom
-from apache_airflow_microsoft_fabric_plugin_sp.hooks.fabric import (
+from apache_airflow_microsoft_fabric_plugin.hooks.fabric import (
     FabricHook,
     FabricRunItemException,
     FabricRunItemStatus,
 )
-from apache_airflow_microsoft_fabric_plugin_sp.triggers.fabric import FabricTrigger
+from apache_airflow_microsoft_fabric_plugin.triggers.fabric import FabricTrigger
 from airflow.utils.decorators import apply_defaults
 
 if TYPE_CHECKING:
