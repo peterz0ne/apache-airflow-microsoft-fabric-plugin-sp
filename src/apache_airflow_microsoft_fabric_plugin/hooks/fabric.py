@@ -13,7 +13,7 @@ from airflow.hooks.base import BaseHook
 from airflow.models import Connection
 from airflow.utils.session import provide_session
 
-FABRIC_SCOPES = "https://api.fabric.microsoft.com/Item.Execute.All https://api.fabric.microsoft.com/Item.ReadWrite.All offline_access openid profile"
+FABRIC_SCOPES = "https://analysis.windows.net/powerbi/api/.default offline_access"
 
 
 @provide_session
@@ -112,7 +112,7 @@ class FabricHook(BaseHook):
 
         connection = self.get_connection(self.conn_id)
         tenant_id = connection.extra_dejson.get("tenantId")
-        client_id = connection.login
+        client_id = connection.extra_dejson.get("clientId")
         # client_secret = connection.extra_dejson.get("clientSecret")
         scopes = connection.extra_dejson.get("scopes", FABRIC_SCOPES)
         client_secret = connection.password
@@ -350,7 +350,7 @@ class FabricAsyncHook(FabricHook):
 
         connection = await sync_to_async(self.get_connection)(self.conn_id)
         tenant_id = connection.extra_dejson.get("tenantId")
-        client_id = connection.login
+        client_id = connection.extra_dejson.get("clientId")
         # client_secret = connection.extra_dejson.get("clientSecret")
         client_secret = connection.password
         scopes = connection.extra_dejson.get("scopes", FABRIC_SCOPES)
